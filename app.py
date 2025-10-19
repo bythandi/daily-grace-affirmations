@@ -120,6 +120,27 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+st.markdown("""
+    <style>
+        /* 🌿 Pure Light Patch — remove residual yellow tint */
+        [data-testid="stVerticalBlock"] div[data-testid="stBlock"] > div:first-child {
+            background-color: transparent !important;
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        /* Tighten spacing between radio buttons + text areas */
+        div.stRadio > div {
+            margin-top: 0.3rem !important;
+            margin-bottom: 0.3rem !important;
+        }
+
+        /* Keep reflection field clean and white */
+        textarea {
+            background-color: #ffffff !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # --- Header ---
 st.markdown("<div class='main-title'>🌸 Divine Systems Daily Affirmation</div>", unsafe_allow_html=True)
