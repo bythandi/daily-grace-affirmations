@@ -6,12 +6,18 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
-# --- Initialize session reflections list ---
-if "session_entries" not in st.session_state:
-    st.session_state.session_entries = []
-
 # --- Page setup ---
 st.set_page_config(page_title="🌸 Divine Systems Daily Affirmation", layout="centered")
+
+# --- Initialize session variables ---
+if "session_entries" not in st.session_state:
+    st.session_state.session_entries = []
+if "deck" not in st.session_state:
+    st.session_state.deck = []
+if "last_affirmation_id" not in st.session_state:
+    st.session_state.last_affirmation_id = None
+if "selected_affirmation" not in st.session_state:
+    st.session_state.selected_affirmation = None
 
 # --- Safety check & load affirmation bank ---
 st.write("👋 App is running — loading affirmations...")
@@ -35,13 +41,29 @@ CATEGORY_DISPLAY = {
 # --- Filter affirmations to 4 canon categories only ---
 affirmations = [a for a in affirmations if a.get("category") in CATEGORY_DISPLAY.keys()]
 
+# --- Initialize deck once per app run ---
+if not st.session_state.deck:
+    st.session_state.deck = affirmations.copy()
+    random.shuffle(st.session_state.deck)
+
 # --- Custom CSS ---
 st.markdown("""
     <style>
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@500;700&family=Roboto:wght@400;500&display=swap');
+
         body {
             background-color: #fff1ea;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
+            color: #521305;
         }
+
+        /* Headers use Raleway */
+        h1, h2, h3, h4, h5, h6, .main-title, .sub-title, .align-title {
+            font-family: 'Raleway', sans-serif;
+            letter-spacing: 0.3px;
+        }
+
         .main-title {
             background-color: #152d69;
             color: white;
@@ -52,6 +74,7 @@ st.markdown("""
             font-weight: 700;
             letter-spacing: 0.5px;
         }
+
         .sub-title {
             background-color: #f7931e;
             color: #521305;
@@ -61,16 +84,39 @@ st.markdown("""
             font-size: 1.3rem;
             font-weight: 600;
         }
+
+        /* 🧡 Affirmation highlight box */
         .affirmation-box {
-            background-color: white;
-            border: 2px solid #e6f0fc;
+            background-color: rgba(247,147,30,0.15);
+            border: 2px solid #f7931e;
             border-radius: 16px;
             padding: 1.2rem;
             margin-top: 1rem;
-            box-shadow: 0px 3px 8px rgba(21,45,105,0.15);
-            color: #521305;
+            box-shadow: 0px 3px 8px rgba(21,45,105,0.1);
+            font-family: 'Roboto', sans-serif;
             font-size: 1.2rem;
             line-height: 1.6;
+        }
+
+        .align-box {
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            margin-top: 30px;
+            margin-bottom: 25px;
+        }
+
+        .align-title {
+            color: #152d69;
+            background-color: #ffcb8f;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        textarea, input, .stTextInput, .stTextArea {
+            font-family: 'Roboto', sans-serif !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -83,28 +129,19 @@ display_options = ["All"] + list(CATEGORY_DISPLAY.values())
 selected_display = st.selectbox("🌸 Explore a Pillar of Truth", display_options, index=0)
 
 if selected_display == "All":
-    filtered_affirmations = affirmations
+    filtered_affirmations = st.session_state.deck
 else:
     internal_category = next(k for k, v in CATEGORY_DISPLAY.items() if v == selected_display)
-    filtered_affirmations = [a for a in affirmations if a["category"] == internal_category]
+    filtered_affirmations = [a for a in st.session_state.deck if a["category"] == internal_category]
 
 st.markdown("---")
 
-# --- Choose an affirmation ---
-if "last_affirmation_id" not in st.session_state:
-    st.session_state.last_affirmation_id = None
+# --- Choose affirmation (stable between reruns) ---
+if st.session_state.selected_affirmation is None:
+    st.session_state.selected_affirmation = random.choice(filtered_affirmations)
+    st.session_state.last_affirmation_id = st.session_state.selected_affirmation["id"]
 
-new_affirmation = random.choice(filtered_affirmations)
-while (
-    st.session_state.last_affirmation_id is not None
-    and new_affirmation["id"] == st.session_state.last_affirmation_id
-    and len(filtered_affirmations) > 1
-):
-    new_affirmation = random.choice(filtered_affirmations)
-
-st.session_state.selected_affirmation = new_affirmation
-st.session_state.last_affirmation_id = new_affirmation["id"]
-affirmation = new_affirmation
+affirmation = st.session_state.selected_affirmation
 
 # --- Display affirmation section ---
 st.markdown("<div class='sub-title'>✨ Today's Affirmation</div>", unsafe_allow_html=True)
@@ -113,7 +150,7 @@ st.markdown(f"<div class='affirmation-box'>📖 {affirmation['text']}</div>", un
 display_category = CATEGORY_DISPLAY.get(affirmation["category"], affirmation["category"])
 st.write(f"🏷️ **Category:** {display_category}")
 
-# --- Reflection / Alignment section (v3.2 visual refinement) ---
+# --- Reflection / Alignment section ---
 st.markdown("""
 <div style="
     background-color: #fff8ef;
@@ -135,12 +172,7 @@ st.markdown("""
 </h3>
 """, unsafe_allow_html=True)
 
-alignment = st.radio(
-    "",
-    ["Aligned 🌿", "Integrating 🌸", "Unaligned 🌧️"],
-    horizontal=False,
-)
-
+alignment = st.radio("", ["Aligned 🌿", "Integrating 🌸", "Unaligned 🌧️"], horizontal=False)
 reflection = st.text_area("🪶 Reflection (optional):", placeholder="Write your thoughts here...")
 
 st.markdown("</div>", unsafe_allow_html=True)
@@ -163,48 +195,23 @@ if st.button("💾 Save & Get New Affirmation"):
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
     st.success("🗂️ Saved to your affirmation log.")
-    st.session_state.selected_affirmation = random.choice(affirmations)
+
+    # Pick a *different* random affirmation without reshuffling
+    new_affirmation = random.choice(filtered_affirmations)
+    while new_affirmation["id"] == affirmation["id"] and len(filtered_affirmations) > 1:
+        new_affirmation = random.choice(filtered_affirmations)
+
+    st.session_state.selected_affirmation = new_affirmation
+    st.session_state.last_affirmation_id = new_affirmation["id"]
+    st.rerun()
+
+# --- Manual Shuffle Deck (optional) ---
+if st.button("🔀 Shuffle Deck (optional)"):
+    random.shuffle(st.session_state.deck)
+    st.success("Deck reshuffled — new divine flow ready!")
     st.rerun()
 
 # --- PDF generation helper ---
-def create_session_pdf(affirmation, category, alignment, reflection):
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-
-    y = height - 80
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(72, y, "🌸 Divine Systems Daily Affirmation Session")
-    y -= 40
-
-    c.setFont("Helvetica", 12)
-    c.drawString(72, y, "✨ Today's Affirmation:")
-    y -= 25
-    text = c.beginText(72, y)
-    text.setFont("Helvetica-Oblique", 12)
-    text.textLines(affirmation)
-    c.drawText(text)
-
-    y -= 60
-    c.setFont("Helvetica", 12)
-    c.drawString(72, y, f"🏷️ Category: {category}")
-
-    y -= 25
-    c.drawString(72, y, f"🌿 Alignment: {alignment}")
-
-    y -= 40
-    c.drawString(72, y, "🪶 Reflection:")
-    y -= 20
-    text = c.beginText(72, y)
-    text.setFont("Helvetica", 11)
-    text.textLines(reflection if reflection else "—")
-    c.drawText(text)
-
-    c.showPage()
-    c.save()
-    buffer.seek(0)
-    return buffer
-
 def create_session_pdf(session_entries):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -238,7 +245,7 @@ def create_session_pdf(session_entries):
         c.drawText(text)
         y -= 80
 
-        if y < 100:  # add new page if near bottom
+        if y < 100:
             c.showPage()
             y = height - 80
 
@@ -260,5 +267,4 @@ else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
 st.markdown("---")
-st.write("🌸 ByThandi Divine Systems — v3.4 “Harvest Notes Edition”")
-
+st.write("🌸 ByThandi Divine Systems — v3.4.1 “Still Waters Edition”")
