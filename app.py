@@ -46,10 +46,9 @@ if not st.session_state.deck:
     st.session_state.deck = affirmations.copy()
     random.shuffle(st.session_state.deck)
 
-# --- Custom CSS ---
+# --- Custom CSS (Fonts, Colours, Layout) ---
 st.markdown("""
     <style>
-        /* Import Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@500;700&family=Roboto:wght@400;500&display=swap');
 
         body {
@@ -58,7 +57,6 @@ st.markdown("""
             color: #521305;
         }
 
-        /* Headers use Raleway */
         h1, h2, h3, h4, h5, h6, .main-title, .sub-title, .align-title {
             font-family: 'Raleway', sans-serif;
             letter-spacing: 0.3px;
@@ -108,36 +106,29 @@ st.markdown("""
 
         .align-title {
             color: #152d69;
-            background-color: #ffcb8f;
+            background-color: #ffe6c0; /* gentle cream */
             padding: 8px 16px;
             border-radius: 8px;
             text-align: center;
             font-weight: 700;
+            font-family: 'Raleway', sans-serif;
         }
 
         textarea, input, .stTextInput, .stTextArea {
             font-family: 'Roboto', sans-serif !important;
+            background-color: #ffffff !important;
         }
-    </style>
-""", unsafe_allow_html=True)
-st.markdown("""
-    <style>
-        /* 🌿 Pure Light Patch — remove residual yellow tint */
+
+        /* Grace Wheels Patch — remove yellow padding */
         [data-testid="stVerticalBlock"] div[data-testid="stBlock"] > div:first-child {
             background-color: transparent !important;
             padding: 0 !important;
             border: none !important;
         }
 
-        /* Tighten spacing between radio buttons + text areas */
         div.stRadio > div {
             margin-top: 0.3rem !important;
             margin-bottom: 0.3rem !important;
-        }
-
-        /* Keep reflection field clean and white */
-        textarea {
-            background-color: #ffffff !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -172,26 +163,8 @@ display_category = CATEGORY_DISPLAY.get(affirmation["category"], affirmation["ca
 st.write(f"🏷️ **Category:** {display_category}")
 
 # --- Reflection / Alignment section ---
-st.markdown("""
-<div style="
-    background-color: #fff8ef;
-    border: 2px solid #ffcb8f;
-    border-radius: 10px;
-    padding: 25px 20px 20px 20px;
-    margin-top: 30px;
-    margin-bottom: 25px;
-">
-<h3 style='
-    color: #152d69;
-    background-color: #ffcb8f;
-    padding: 8px 16px;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 700;
-'>
-✨ How aligned do you feel today?
-</h3>
-""", unsafe_allow_html=True)
+st.markdown("<div class='align-box'>", unsafe_allow_html=True)
+st.markdown("<h3 class='align-title'>✨ How aligned do you feel today?</h3>", unsafe_allow_html=True)
 
 alignment = st.radio("", ["Aligned 🌿", "Integrating 🌸", "Unaligned 🌧️"], horizontal=False)
 reflection = st.text_area("🪶 Reflection (optional):", placeholder="Write your thoughts here...")
@@ -208,16 +181,13 @@ if st.button("💾 Save & Get New Affirmation"):
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
-    # Add to session memory
     st.session_state.session_entries.append(log_entry)
 
-    # Save to file
     with open("affirmation_log.json", "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
     st.success("🗂️ Saved to your affirmation log.")
 
-    # Pick a *different* random affirmation without reshuffling
     new_affirmation = random.choice(filtered_affirmations)
     while new_affirmation["id"] == affirmation["id"] and len(filtered_affirmations) > 1:
         new_affirmation = random.choice(filtered_affirmations)
@@ -275,6 +245,7 @@ def create_session_pdf(session_entries):
     buffer.seek(0)
     return buffer
 
+# --- PDF download section ---
 if st.session_state.session_entries:
     st.markdown("### 💾 Download your full session")
     pdf_buffer = create_session_pdf(st.session_state.session_entries)
@@ -288,4 +259,4 @@ else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
 st.markdown("---")
-st.write("🌸 ByThandi Divine Systems — v3.4.1 “Still Waters Edition”")
+st.write("🌸 ByThandi Divine Systems — v3.4.5 “Grace Wheels Patch”")
