@@ -19,7 +19,7 @@ if "last_affirmation_id" not in st.session_state:
 if "selected_affirmation" not in st.session_state:
     st.session_state.selected_affirmation = None
 
-# --- Safety check & load affirmation bank ---
+# --- Load affirmation bank ---
 st.write("👋 App is running — loading affirmations...")
 
 try:
@@ -30,7 +30,7 @@ except Exception as e:
     st.error(f"⚠️ Could not load affirmation_bank.json: {e}")
     affirmations = [{"text": "Affirmation data not loaded.", "category": "Error"}]
 
-# --- Friendly display names (UI only) ---
+# --- Category display mapping ---
 CATEGORY_DISPLAY = {
     "Create": "Create Flow",
     "Build": "Build Discipline",
@@ -38,15 +38,15 @@ CATEGORY_DISPLAY = {
     "Weave": "Weave Wholeness"
 }
 
-# --- Filter affirmations to 4 canon categories only ---
+# --- Filter to canonical categories ---
 affirmations = [a for a in affirmations if a.get("category") in CATEGORY_DISPLAY.keys()]
 
-# --- Initialize deck once per app run ---
+# --- Initialize shuffled deck ---
 if not st.session_state.deck:
     st.session_state.deck = affirmations.copy()
     random.shuffle(st.session_state.deck)
 
-# --- Custom CSS (Fonts, Colours, Layout) ---
+# --- Custom CSS ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@500;700&family=Roboto:wght@400;500&display=swap');
@@ -59,7 +59,6 @@ st.markdown("""
 
         h1, h2, h3, h4, h5, h6, .main-title, .sub-title, .align-title {
             font-family: 'Raleway', sans-serif;
-            letter-spacing: 0.3px;
         }
 
         .main-title {
@@ -70,7 +69,6 @@ st.markdown("""
             text-align: center;
             font-size: 1.8rem;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
 
         .sub-title {
@@ -83,19 +81,6 @@ st.markdown("""
             font-weight: 600;
         }
 
-        /* 🧡 Affirmation highlight box */
-        .affirmation-box {
-            background-color: rgba(247,147,30,0.15);
-            border: 2px solid #f7931e;
-            border-radius: 16px;
-            padding: 1.2rem;
-            margin-top: 1rem;
-            box-shadow: 0px 3px 8px rgba(21,45,105,0.1);
-            font-family: 'Roboto', sans-serif;
-            font-size: 1.2rem;
-            line-height: 1.6;
-        }
-
         .align-box {
             background-color: transparent;
             border: none;
@@ -106,7 +91,7 @@ st.markdown("""
 
         .align-title {
             color: #152d69;
-            background-color: #ffe6c0; /* gentle cream */
+            background-color: #ffe6c0;
             padding: 8px 16px;
             border-radius: 8px;
             text-align: center;
@@ -119,7 +104,6 @@ st.markdown("""
             background-color: #ffffff !important;
         }
 
-        /* Grace Wheels Patch — remove yellow padding */
         [data-testid="stVerticalBlock"] div[data-testid="stBlock"] > div:first-child {
             background-color: transparent !important;
             padding: 0 !important;
@@ -148,30 +132,48 @@ else:
 
 st.markdown("---")
 
-# --- Choose affirmation (stable between reruns) ---
+# --- Choose affirmation ---
 if st.session_state.selected_affirmation is None:
     st.session_state.selected_affirmation = random.choice(filtered_affirmations)
     st.session_state.last_affirmation_id = st.session_state.selected_affirmation["id"]
 
 affirmation = st.session_state.selected_affirmation
 
-# --- Display affirmation section ---
-st.markdown("<div class='sub-title'>✨ Today's Affirmation</div>", unsafe_allow_html=True)
-st.markdown(f"<div class='affirmation-box'>📖 {affirmation['text']}</div>", unsafe_allow_html=True)
-
-display_category = CATEGORY_DISPLAY.get(affirmation["category"], affirmation["category"])
-st.write(f"🏷️ **Category:** {display_category}")
-
-# --- Reflection / Alignment section ---
-st.markdown("<div class='align-box'>", unsafe_allow_html=True)
-st.markdown("<h3 class='align-title'>✨ How aligned do you feel today?</h3>", unsafe_allow_html=True)
-
+# --- Alignment & reflection inputs ---
 alignment = st.radio("", ["Aligned 🌿", "Integrating 🌸", "Unaligned 🌧️"], horizontal=False)
 reflection = st.text_area("🪶 Reflection (optional):", placeholder="Write your thoughts here...")
 
-st.markdown("</div>", unsafe_allow_html=True)
+# --- Emoji map ---
+category_emojis = {
+    "Create Flow": "🪷",
+    "Build Discipline": "💪🏾",
+    "Believe Again": "✝️",
+    "Weave Wholeness": "🧵"
+}
+display_category = CATEGORY_DISPLAY.get(affirmation["category"], affirmation["category"])
+emoji = category_emojis.get(display_category, "🌸")
 
-# --- Save and refresh ---
+# --- Affirmation card ---
+affirmation_html = f"""
+<div style='background-color:#ffffff; border-radius:20px; padding:1.5rem;
+            box-shadow:0px 3px 8px rgba(21,45,105,0.1); margin-top:1.5rem;'>
+    <h3 style='color:#152d69; font-family:Raleway, sans-serif; font-size:1.4rem;'>
+        <b>{emoji} {affirmation['text']}</b>
+    </h3>
+    <p style='margin:0.4rem 0; font-size:1rem; color:#521305;'>
+        🏷️ <b>{display_category}</b>
+    </p>
+    <p style='margin:0.2rem 0; font-size:1rem;'>✅ integrating</p>
+    <div style='background-color:#fff1ea; border-left:4px solid #f7931e;
+                padding:0.8rem 1rem; border-radius:8px; margin-top:0.6rem;'>
+        <p style='margin:0; color:#521305;'><b>🪶 Reflection:</b><br>
+        {reflection if reflection else "I will do so going forward, this is something I need to work on."}</p>
+    </div>
+</div>
+"""
+st.markdown(affirmation_html, unsafe_allow_html=True)
+
+# --- Save + new affirmation ---
 if st.button("💾 Save & Get New Affirmation"):
     log_entry = {
         "text": affirmation["text"],
@@ -180,9 +182,7 @@ if st.button("💾 Save & Get New Affirmation"):
         "reflection": reflection,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-
     st.session_state.session_entries.append(log_entry)
-
     with open("affirmation_log.json", "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
@@ -196,23 +196,26 @@ if st.button("💾 Save & Get New Affirmation"):
     st.session_state.last_affirmation_id = new_affirmation["id"]
     st.rerun()
 
-# --- Manual Shuffle Deck (optional) ---
+# --- Shuffle option ---
 if st.button("🔀 Shuffle Deck (optional)"):
     random.shuffle(st.session_state.deck)
     st.success("Deck reshuffled — new divine flow ready!")
     st.rerun()
 
-# --- PDF generation helper ---
+# --- PDF generator ---
 def create_session_pdf(session_entries):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
     y = height - 80
 
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(72, y, "🌸 Divine Systems Daily Affirmation Session")
-    y -= 40
+    # Consistent header
+    c.setFont("Helvetica-Bold", 18)
+    c.setFillColorRGB(0.08, 0.18, 0.41)  # ByThandi Blue
+    c.drawString(72, y, "🌸 Divine Systems Daily Affirmation")
+    y -= 50
 
+    c.setFillColorRGB(0, 0, 0)
     c.setFont("Helvetica", 12)
     c.drawString(72, y, f"Total entries: {len(session_entries)}")
     y -= 30
@@ -239,6 +242,11 @@ def create_session_pdf(session_entries):
         if y < 100:
             c.showPage()
             y = height - 80
+            c.setFont("Helvetica-Bold", 18)
+            c.setFillColorRGB(0.08, 0.18, 0.41)
+            c.drawString(72, y, "🌸 Divine Systems Daily Affirmation")
+            y -= 50
+            c.setFillColorRGB(0, 0, 0)
 
     c.showPage()
     c.save()
@@ -259,4 +267,4 @@ else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
 st.markdown("---")
-st.write("🌸 ByThandi Divine Systems — v3.4.5 “Grace Wheels Patch”")
+st.write("🌸 ByThandi Divine Systems — v3.6 “Header Harmony Patch”")
