@@ -204,46 +204,190 @@ if st.button("🔀 Shuffle Deck (optional)"):
 
 # --- PDF generation helper ---
 def create_session_pdf(session_entries):
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-    y = height - 80
+    from io import BytesIO
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.units import mm
+    from reportlab.lib.colors import HexColor
 
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(72, y, "🌸 Divine Systems Daily Affirmation Session")
-    y -= 40
+    # --- Brand palette ---
+    COL_BG_CREAM   = HexColor("#fff1ea")
+    COL_DEEP_BLUE  = HexColor("#152d69")
+    COL_ORANGE     = HexColor("#f7931e")
+    COL_BROWN      = HexColor("#521305")
+    COL_CARD_FILL  = HexColor("#ffe6c0")
+    COL_TEXT_MUTED = HexColor("#666666")
 
-    c.setFont("Helvetica", 12)
-    c.drawString(72, y, f"Total entries: {len(session_entries)}")
-    y -= 30
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=letter)
+    W, H = letter
+
+    margin = 18 * mm
+    inner_w = W - 2 * margin
+
+    # --- helpers -------------------------------------------------------------
+    def header(page_dt_str=None):
+        # cream page background band at top
+        c.setFillColor(COL_BG_CREAM)
+        c.rect(0, H - 28*mm, W, 28*mm, stroke=0, fill=1)
+
+        # title
+        c.setFillColor(COL_DEEP_BLUE)
+        c.setFont("Helvetica-Bold", 18)
+        c.drawString(margin, H - 15*mm, "Divine Systems – Daily Affirmation")
+
+        # datestamp / muted
+        c.setFont("Helvetica", 10)
+        c.setFillColor(COL_TEXT_MUTED)
+        if page_dt_str:
+            c.drawString(margin, H - 20*mm, page_dt_str)
+
+        # thin orange accent line
+        c.setStrokeColor(COL_ORANGE)
+        c.setLineWidth(2)
+        c.line(margin, H - 22*mm, W - margin, H - 22*mm)
+
+    def footer():
+        c.setStrokeColor(COL_BG_CREAM)
+        c.setLineWidth(14)
+        c.line(0, margin - 6, W, margin - 6)
+
+        c.setFillColor(COL_TEXT_MUTED)
+        c.setFont("Helvetica-Oblique", 9)
+        c.drawRightString(W - margin, margin - 2, "Divine Systems • bythandi.com")
+
+    def wrap_text(text, max_width, font_name="Helvetica", font_size=10):
+        """Simple word-wrap using ReportLab width metrics."""
+        if not text:
+            return ["—"]
+        words = text.split()
+        lines, line = [], ""
+        for w in words:
+            test = (line + " " + w).strip()
+            if c.stringWidth(test, font_name, font_size) <= max_width:
+                line = test
+            else:
+                lines.append(line or w)
+                line = w
+        if line:
+            lines.append(line)
+        return lines
+
+    def new_page(include_dt=False):
+        c.showPage()
+        header(datetime.now().strftime("%Y-%m-%d %H:%M") if include_dt else None)
+        footer()
+        return H - 30*mm  # reset y below header
+
+    # ------------------------------------------------------------------------
+    # first page header/footer
+    header(datetime.now().strftime("%Y-%m-%d %H:%M"))
+    footer()
+
+    y = H - 32*mm
+
+    # Summary block
+    c.setFont("Helvetica-Bold", 12)
+    c.setFillColor(COL_BROWN)
+    c.drawString(margin, y, f"Session Summary")
+    y -= 6*mm
+    c.setFillColor(COL_TEXT_MUTED)
+    c.setFont("Helvetica", 10)
+    c.drawString(margin, y, f"Total entries: {len(session_entries)}")
+    y -= 6*mm
+
+    # divider
+    c.setStrokeColor(COL_BG_CREAM)
+    c.setLineWidth(3)
+    c.line(margin, y, W - margin, y)
+    y -= 4*mm
+
+    # Entry cards
+    card_pad = 6 * mm
+    min_y = margin + 20  # keep footer area clear
 
     for i, entry in enumerate(session_entries, 1):
+        # compute card height dynamically (wrap reflection)
+        title_text = f"{i}. {entry.get('text','')}"
+        reflection = entry.get('reflection', '')
+        category = entry.get('category', '')
+        alignment = entry.get('alignment', '')
+        date_str = entry.get('date', '')
+
+        # metrics
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(72, y, f"{i}. ✨ {entry['text'][:70]}...")
-        y -= 20
+        title_height = 5*mm + 12  # rough line height
 
-        c.setFont("Helvetica", 11)
-        c.drawString(72, y, f"🏷️ {CATEGORY_DISPLAY.get(entry['category'], entry['category'])}")
-        y -= 15
-        c.drawString(72, y, f"🌿 {entry['alignment']}")
-        y -= 15
+        c.setFont("Helvetica", 10)
+        meta_height = 5*mm + 10
 
-        c.drawString(72, y, "🪶 Reflection:")
-        y -= 15
-        text = c.beginText(90, y)
-        text.setFont("Helvetica", 10)
-        text.textLines(entry['reflection'] if entry['reflection'] else "—")
-        c.drawText(text)
-        y -= 80
+        # available text width inside card
+        inner_text_w = inner_w - 2*card_pad
 
-        if y < 100:
-            c.showPage()
-            y = height - 80
+        # wrap reflection
+        refl_lines = wrap_text(reflection, inner_text_w, "Helvetica", 10)
+        refl_height = (len(refl_lines) * 12) + 2*mm
 
-    c.showPage()
+        # total card height
+        card_h = card_pad + title_height + 2*mm + meta_height + 2*mm + 10 + refl_height + card_pad
+
+        # page break if needed
+        if y - card_h < min_y:
+            y = new_page(include_dt=True)
+
+        # card background
+        c.setFillColor(COL_CARD_FILL)
+        c.setStrokeColor(COL_ORANGE)
+        c.setLineWidth(1.5)
+        c.roundRect(margin, y - card_h, inner_w, card_h, 6, stroke=1, fill=1)
+
+        # content inside card
+        cx = margin + card_pad
+        cy = y - card_pad
+
+        # title
+        c.setFillColor(COL_BROWN)
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(cx, cy - 12, title_text)
+        cy -= title_height
+
+        # meta row (category • alignment • date)
+        c.setFont("Helvetica", 10)
+        c.setFillColor(COL_DEEP_BLUE)
+        # Use external map if available
+        try:
+            display_cat = CATEGORY_DISPLAY.get(category, category)
+        except Exception:
+            display_cat = category
+        meta = f"{display_cat}  •  {alignment}  •  {date_str}"
+        c.drawString(cx, cy - 10, meta)
+        cy -= meta_height
+
+        # small divider
+        c.setStrokeColor(COL_ORANGE)
+        c.setLineWidth(0.6)
+        c.line(cx, cy, margin + inner_w - card_pad, cy)
+        cy -= 6
+
+        # reflection label
+        c.setFont("Helvetica-Bold", 10)
+        c.setFillColor(COL_BROWN)
+        c.drawString(cx, cy, "Reflection")
+        cy -= 12
+
+        # reflection body (wrapped)
+        c.setFont("Helvetica", 10)
+        c.setFillColor(COL_BROWN)
+        for line in refl_lines:
+            c.drawString(cx, cy, line)
+            cy -= 12
+
+        # move to next card
+        y -= (card_h + 4*mm)
+
     c.save()
-    buffer.seek(0)
-    return buffer
+    buf.seek(0)
+    return buf
 
 # --- PDF download section ---
 if st.session_state.session_entries:
