@@ -13,6 +13,23 @@ LOGO_URL = "https://github.com/bythandi/divine-systems-dashboard/blob/main/Bytha
 # --- Page setup ---
 st.set_page_config(page_title="🌸 Divine Systems Daily Affirmation", layout="centered")
 
+# --- Logo section (top-right) ---
+if LOGO_URL:
+    st.markdown(
+        f"""
+        <div style="
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: -40px;
+            padding-right: 10px;
+        ">
+            <img src="{LOGO_URL}" width="120">
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 # --- Initialize session variables ---
 if "session_entries" not in st.session_state:
     st.session_state.session_entries = []
