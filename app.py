@@ -11,7 +11,7 @@ LOGO_URL = "https://github.com/bythandi/divine-systems-dashboard/blob/main/Bytha
 # LOGO_URL = None  # <- uncomment this line to disable the logo quickly
 
 # --- Page setup ---
-st.set_page_config(page_title="🌸 Divine Systems Daily Affirmation", layout="centered")
+st.set_page_config(page_title="🌿 Daily Grace Affirmations", layout="centered")
 
 # --- Logo section (centered) ---
 if LOGO_URL:
@@ -153,7 +153,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Header ---
-st.markdown("<div class='main-title'>🌸 Divine Systems Daily Affirmation</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>🌿 Daily Grace Affirmations</div>", unsafe_allow_html=True)
+st.caption("_A ByThandi Creation_")
 
 # --- Category selection ---
 display_options = ["All"] + list(CATEGORY_DISPLAY.values())
@@ -218,7 +219,7 @@ if st.button("💾 Save & Get New Affirmation"):
 # --- Manual Shuffle Deck (optional) ---
 if st.button("🔀 Shuffle Deck (optional)"):
     random.shuffle(st.session_state.deck)
-    st.success("Deck reshuffled — new divine flow ready!")
+    st.success("Deck reshuffled — new grace flow ready!")
     st.rerun()
 
 # --- PDF generation helper (brand-styled, optional logo) ---
@@ -286,7 +287,7 @@ def create_session_pdf(session_entries, logo_url=LOGO_URL):
 
         c.setFillColor(COL_DEEP_BLUE)
         c.setFont("Helvetica-Bold", 18)
-        c.drawString(margin, H - 15*mm, "Divine Systems – Daily Affirmation")
+        c.drawString(margin, H - 15*mm, "Daily Grace Affirmations")
 
         c.setFont("Helvetica", 10)
         c.setFillColor(COL_TEXT_MUTED)
@@ -305,7 +306,7 @@ def create_session_pdf(session_entries, logo_url=LOGO_URL):
         c.line(0, margin - 6, W, margin - 6)
         c.setFillColor(COL_TEXT_MUTED)
         c.setFont("Helvetica-Oblique", 9)
-        c.drawRightString(W - margin, margin - 2, "Divine Systems • bythandi.com")
+        c.drawRightString(W - margin, margin - 2, "Daily Grace Affirmations • bythandi.com")
 
     def wrap_text(text, max_width, font_name="Helvetica", font_size=10):
         if not text:
@@ -433,6 +434,5 @@ else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
 st.markdown(
-    "🌸 ByThandi Divine Systems — v3.5.0 *Grace Wheels II — The Paper Bloom*  \n🔗 [bythandi.com](https://bythandi.com)"
+    "🌸 ByThandi — Daily Grace Affirmations — v3.5.0 *Grace Wheels II — The Paper Bloom*  \n🔗 [bythandi.com](https://bythandi.com)"
 )
-
