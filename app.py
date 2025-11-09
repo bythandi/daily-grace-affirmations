@@ -13,16 +13,16 @@ LOGO_URL = "https://github.com/bythandi/divine-systems-dashboard/blob/main/Bytha
 # --- Page setup ---
 st.set_page_config(page_title="🌸 Divine Systems Daily Affirmation", layout="centered")
 
-# --- Logo section (top-right) ---
+# --- Logo section (centered) ---
 if LOGO_URL:
     st.markdown(
         f"""
         <div style="
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
             align-items: center;
             margin-bottom: -40px;
-            padding-right: 10px;
+            padding-top: 10px;
         ">
             <img src="{LOGO_URL}" width="120">
         </div>
