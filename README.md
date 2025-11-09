@@ -1,33 +1,39 @@
-# 🌸 Divine Systems Dashboard
+Perfect 🌸 — here’s the **refreshed and renamed README** for your project, now aligned with the **Daily Grace Affirmations** identity.
+It keeps the poetic rhythm and reflective warmth of the Divine Systems version but presents *Daily Grace* as its own standalone experience — graceful, grounded, and portfolio-ready.
 
-*A faith-coded affirmation engine by ByThandi — where creativity meets calm and systems meet spirit.*
+---
+
+# 🌸 Daily Grace Affirmations
+
+*A ByThandi creation — where calm meets creativity and faith meets focus.*
 
 ---
 
 ## ✨ Overview
 
-The **Divine Systems Dashboard** is a Streamlit-powered daily affirmation app designed to help users realign faith, focus, and flow.
-It draws from a growing JSON affirmation bank, allows reflections, and gently records the user’s journey of alignment.
+The **Daily Grace Affirmations** app is a Streamlit-powered reflection tool that helps users centre their day in faith, creativity, and gentle discipline.
 
-Built in the “Python Corner” of ByThandi — a creative lab for divine-inspired code experiments — this project marks the fusion of technology, spirituality, and self-expression.
+Rooted in the ByThandi ecosystem, it began as a learning experiment in Python and evolved into a soulful digital companion — one that blends code, design, and devotion into a simple daily practice.
+
+Built in the **Python Corner** — Thandi’s creative lab for divinely inspired code — this project bridges the sacred and the systematic, inviting users to breathe, reflect, and realign.
 
 ---
 
 ## 🌿 Features
 
-* 🌸 Beautiful Streamlit interface styled in ByThandi brand colours
-* 🪶 Randomized daily affirmations from a JSON bank
-* 💾 “Save & Get New” button to log reflections locally
-* 🧭 Category selector: **Create | Build | Believe | Weave**
-* 🗂️ Auto-generated affirmation logs (for reflection & journaling)
+* 🌸 Minimal, calming Streamlit interface in ByThandi brand colours
+* 🪶 Curated affirmation bank drawn from the *Create · Build · Believe · Weave* framework
+* 💾 Reflection and journaling options to nurture awareness and growth
+* 🧭 Randomised daily affirmations with optional category selection
 * ☁️ Fully deployed on **Streamlit Community Cloud**
+* 💌 Email-to-PDF feature (coming soon) to gently collect user affirmations
 
 ---
 
 ## 🧩 Tech Stack
 
 | Layer           | Tool                               |
-| --------------- | ---------------------------------- |
+| :-------------- | :--------------------------------- |
 | Framework       | [Streamlit](https://streamlit.io/) |
 | Language        | Python 3                           |
 | Data            | JSON                               |
@@ -36,67 +42,56 @@ Built in the “Python Corner” of ByThandi — a creative lab for divine-inspi
 
 ---
 
-## 🌸 The Journey — *From Day 1 to Divine Systems v3.2*
+## 🌼 The Journey — *From Curiosity to Grace*
 
-### **Day 1:** *The Spark*
+### **Day 1 — The Spark**
 
 > “I wanted to learn Python… so I built an affirmation tool.”
 
-* Started in Google Colab with a few lines of code and a dream.
-* Learned how to import `random`, `json`, and `datetime`.
-* Created the first local version of `divine_systems_affirmation_engine.py`.
+* Began in Google Colab with a few lines of code and a calling to create.
+* Learned the basics of `random`, `json`, and `datetime`.
+* Discovered that even syntax errors can teach patience and trust.
 
 ---
 
-### **Day 3-5:** *Debugging as Devotion*
+### **Days 3–5 — Debugging as Devotion**
 
-* Encountered JSON formatting errors, session issues, and encoding quirks.
-* Learned that every bug is a divine breadcrumb leading to clarity.
-* Added gentle UI styling to mirror the ByThandi aesthetic.
+* Faced JSON quirks, session resets, and formatting frustrations.
+* Learned that every bug is an opportunity to listen and grow.
+* Styled the interface to reflect the soft hues of ByThandi’s brand palette.
 
-> “Every error was an invitation to slow down and listen.”
-
----
-
-### **Day 6-7:** *The Breakthrough*
-
-* Discovered Streamlit and deployed prototypes via Google Colab tunnels.
-* Met the *RR_NGROK_8012* error (and survived 😅).
-* Decided to move the project to Streamlit Community Cloud for stability.
+> “Every function I fixed became a faith function.”
 
 ---
 
-### **Day 8:** *Divine Systems v3.2 — Faith-coded. Debugged with Grace.*
+### **Days 6–8 — The Breakthrough**
 
-* Successfully migrated to GitHub → Streamlit Cloud.
-* Created the repository **`divine-systems-dashboard`**.
-* Expanded the affirmation bank to 20+ entries.
-* Added a category selector for Create | Build | Believe | Weave.
-* Achieved smooth single-click refresh and stable performance.
-* Declared:
+* Transitioned from Colab tunnels to **Streamlit Cloud**.
+* Expanded the affirmation bank to 20+ faith-coded entries.
+* Introduced category filters for *Create · Build · Believe · Weave*.
+* Declared the first stable version: **Daily Grace Affirmations v1.0.**
 
-  > “Pre-AI coding era could never.” 😂
+> “Pre-AI coding era could never.” 😂
 
 ---
 
-## 🌼 Version History
+## 🌸 Version History
 
-| Version  | Highlights                                                  | Date           |
-| -------- | ----------------------------------------------------------- | -------------- |
-| **v1.0** | First Colab prototype (“Divine Systems Affirmation Engine”) | Early Oct 2025 |
-| **v2.0** | Styled UI, affirmation logs added                           | Mid Oct 2025   |
-| **v3.0** | Migration to GitHub + Streamlit Cloud                       | 16 Oct 2025    |
-| **v3.1** | Expanded affirmation bank (20+ entries)                     | 16 Oct 2025    |
-| **v3.2** | Added category filter, stability fixes                      | 16 Oct 2025    |
-
-> *“Every function I fix becomes a faith function.”*
+| Version  | Highlights                                               | Date     |
+| :------- | :------------------------------------------------------- | :------- |
+| **v1.0** | First Streamlit release under *Daily Grace Affirmations* | Oct 2025 |
+| **v1.1** | Enhanced interface and refined categories                | Oct 2025 |
+| **v1.2** | Added reflection inputs and stable PDF generation        | Nov 2025 |
+| **v1.3** | Upcoming: Email delivery integration                     | —        |
 
 ---
 
 ## 💖 Reflection
 
-This project began as an experiment in learning code and became a meditation on faith, structure, and creative freedom.
-It stands as proof that systems — when infused with spirit — can be beautiful, gentle, and alive.
+**Daily Grace Affirmations** began as code but became communion —
+a meeting place between structure and spirit, where systems can still feel soft.
+
+It’s proof that when we build with presence, even a Python app can become a prayer.
 
 > “Debugging isn’t failure; it’s conversation.”
 
@@ -105,25 +100,26 @@ It stands as proof that systems — when infused with spirit — can be beautifu
 ## 🪶 Credits
 
 **Creator:** [ByThandi](https://bythandi.com)
-**Inspiration:** Faith, creativity, and the desire to build tools that align soul + system.
-**Technology:** Streamlit, Python, and lots of divine timing.
+**Inspiration:** Grace, creativity, and the quiet desire to code with compassion.
+**Technology:** Streamlit · Python · ReportLab · Divine timing
 
 ---
 
 ## ☕ Support & Future Vision
 
-* 🌸 Add cloud logging (Google Sheets or Notion integration)
-* 🎨 Enhanced UI components (cards, icons, animations)
-* 🕊️ “Affirmation Archive” page for previous entries
-* 💫 Potential integration into the [ByThandi.com](https://bythandi.com) Tools section
+* 💌 Email-to-PDF feature for affirmation delivery
+* ☁️ Optional cloud reflection storage (Google Sheets / Notion)
+* 🎨 Enhanced visual design with cards and icons
+* 🕊️ “Affirmation Archive” for personal history tracking
+* 💫 Integration into [ByThandi.com](https://bythandi.com) — *Tools of Grace* section
 
-If you’d like to explore, remix, or learn from this app — feel free.
-Please credit **ByThandi** and keep its spirit of creativity and faith intact.
+If you’d like to explore or remix this app, please credit **ByThandi** and preserve its spirit of creativity and peace.
 
 ---
 
 ### 🌺 Tagline
 
-> *Divine Systems — where code becomes prayer and structure becomes peace.*
+> *Daily Grace — where faith flows through every line of code.*
 
 ---
+
