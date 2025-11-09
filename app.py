@@ -415,5 +415,7 @@ if st.session_state.session_entries:
 else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
-st.markdown("---")
-st.write("🌸 ByThandi Divine Systems — v3.5.0 “Grace Wheels II — The Paper Bloom”")
+st.markdown(
+    "🌸 ByThandi Divine Systems — v3.5.0 *Grace Wheels II — The Paper Bloom*  \n🔗 [bythandi.com](https://bythandi.com)"
+)
+
