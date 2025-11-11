@@ -16,8 +16,7 @@ from pathlib import Path
 # -----------------------------
 # Logo: prefer local asset, fallback to remote raw URL
 # -----------------------------
-LOGO_PATH = "assets/bythandi_logo.png"  # add this file to your repo
-LOGO_URL = "https://raw.githubusercontent.com/bythandi/divine-systems-dashboard/main/assets/bythandi_logo.png"
+LOGO_PATH = "https://raw.githubusercontent.com/bythandi/divine-systems-dashboard/main/assets/bythandi_logo.png"  # add this file to your repo
 
 def _logo_source() -> str | None:
     """
