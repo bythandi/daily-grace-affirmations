@@ -1,5 +1,5 @@
 # app.py — Daily Grace Affirmations (with Resend transactional email)
-# Reordered so create_session_pdf is defined BEFORE it’s first used.
+# v4.0.2 — Robust PDF helper (no global lookups) + minor hardening
 
 import streamlit as st
 import random
@@ -203,8 +203,8 @@ reflection = st.text_area("🪶 Reflection (optional):", placeholder="Write your
 st.markdown("</div>", unsafe_allow_html=True)
 
 # --- PDF generation helper (brand-styled, optional logo) ---
-# (Moved up so it's defined before first use)
-def create_session_pdf(session_entries, logo_url=LOGO_URL):
+# Robust: no global lookups; everything is passed in.
+def create_session_pdf(session_entries, logo_url=None, category_display=None):
     from io import BytesIO
     from reportlab.pdfgen import canvas
     from reportlab.lib.pagesizes import letter
@@ -372,7 +372,7 @@ def create_session_pdf(session_entries, logo_url=LOGO_URL):
         c.setFont("Helvetica", 10)
         c.setFillColor(COL_DEEP_BLUE)
         try:
-            display_cat = CATEGORY_DISPLAY.get(category, category)
+            display_cat = (category_display or {}).get(category, category)
         except Exception:
             display_cat = category
         meta = f"{display_cat}  •  {alignment}  •  {date_str}"
@@ -500,7 +500,11 @@ if st.button(cta_label) and affirmation:
         pass
 
     # Generate a one-item PDF for this affirmation
-    single_pdf = create_session_pdf([log_entry], logo_url=LOGO_URL)
+    single_pdf = create_session_pdf(
+        [log_entry],
+        logo_url=LOGO_URL,
+        category_display=CATEGORY_DISPLAY
+    )
 
     if delivery_method == "📧 Email me the PDF":
         if not user_email or not _validate_email(user_email):
@@ -539,7 +543,11 @@ if st.button("🔀 Shuffle Deck (optional)"):
 # --- PDF download section ---
 if st.session_state.session_entries:
     st.markdown("### 💾 Download your full session")
-    pdf_buffer = create_session_pdf(st.session_state.session_entries, logo_url=LOGO_URL)
+    pdf_buffer = create_session_pdf(
+        st.session_state.session_entries,
+        logo_url=LOGO_URL,
+        category_display=CATEGORY_DISPLAY
+    )
     st.download_button(
         label="📄 Download Full Session (.pdf)",
         data=pdf_buffer,
@@ -550,5 +558,5 @@ else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
 st.markdown(
-    "🌸 ByThandi — Daily Grace Affirmations — v4.0.1 *Grace Wheels III — Email Bloom Patch I*  \n🔗 [bythandi.com](https://bythandi.com)"
+    "🌸 ByThandi — Daily Grace Affirmations — v4.0.2 *Grace Wheels III — Email Bloom Patch II*  \n🔗 [bythandi.com](https://bythandi.com)"
 )
