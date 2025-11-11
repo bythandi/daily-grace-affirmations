@@ -1,17 +1,18 @@
 # app.py — Daily Grace Affirmations
-# v4.0.4 — Logo Harmony Fix + Local Fallback + Stable Raw URL
+# v3.8 — Grace Wheels II “The Paper Bloom” (No Email Version)
 
 import streamlit as st
 import random
 import json
-import base64
-import resend
-import re
 from datetime import datetime
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from pathlib import Path
+from reportlab.lib.colors import HexColor
+from reportlab.lib.utils import ImageReader
+import requests
+import io
 
 # -----------------------------
 # 🌸 Logo: prefer local asset, fallback to stable raw URL
@@ -21,7 +22,6 @@ LOGO_LOCAL = APP_DIR / "Bythandi Logo.png"
 LOGO_REMOTE = "https://raw.githubusercontent.com/bythandi/daily-grace-affirmations/main/Bythandi%20Logo.png"
 
 def _logo_source() -> str | None:
-    """Prefer local file for reliability (works offline and avoids GitHub rate limits)."""
     try:
         if LOGO_LOCAL.exists():
             return str(LOGO_LOCAL)
@@ -53,7 +53,6 @@ if logo_src:
         unsafe_allow_html=True,
     )
 
-
 # -----------------------------
 # 💾 Session State Initialization
 # -----------------------------
@@ -66,8 +65,6 @@ if "last_affirmation_id" not in st.session_state:
 if "selected_affirmation" not in st.session_state:
     st.session_state.selected_affirmation = None
 
-st.write("👋 App is running — loading affirmations...")
-
 # --- Load affirmation bank ---
 try:
     with open("affirmation_bank.json", "r", encoding="utf-8") as f:
@@ -76,7 +73,6 @@ try:
 except Exception as e:
     st.error(f"⚠️ Could not load affirmation_bank.json: {e}")
     affirmations = [{"text": "Affirmation data not loaded.", "category": "Error"}]
-
 
 # -----------------------------
 # ✨ Display Categories
@@ -151,13 +147,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
 # -----------------------------
 # 🌸 Header
 # -----------------------------
 st.markdown("<div class='main-title'>🌿 Daily Grace Affirmations</div>", unsafe_allow_html=True)
 st.caption("_A ByThandi Creation_")
-
 
 # -----------------------------
 # 🧭 Category selection
@@ -172,7 +166,6 @@ else:
     filtered_affirmations = [a for a in st.session_state.deck if a["category"] == internal_category]
 
 st.markdown("---")
-
 
 # -----------------------------
 # 💬 Select and show affirmation
@@ -191,7 +184,6 @@ if affirmation:
 else:
     st.warning("No affirmations available. Please check your affirmation bank.")
 
-
 # -----------------------------
 # 🪶 Reflection section
 # -----------------------------
@@ -207,26 +199,22 @@ reflection = st.text_area("🪶 Reflection (optional):", placeholder="Write your
 # 📄 PDF Generation Helper
 # -----------------------------
 def create_session_pdf(session_entries, logo_url=None, category_display=None):
-    from reportlab.lib.units import mm
-    from reportlab.lib.colors import HexColor
-    from reportlab.lib.utils import ImageReader
-    import io, requests
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=letter)
+    W, H = letter
+    margin = 40
+    y = H - margin
 
-    # Brand colors
-    COL_BG_CREAM   = HexColor("#fff1ea")
-    COL_DEEP_BLUE  = HexColor("#152d69")
-    COL_ORANGE     = HexColor("#f7931e")
-    COL_BROWN      = HexColor("#521305")
-    COL_CARD_FILL  = HexColor("#ffe6c0")
-    COL_TEXT_MUTED = HexColor("#666666")
+    # brand colours
+    COL_BROWN = HexColor("#521305")
+    COL_ORANGE = HexColor("#f7931e")
 
-    # Try to load logo
+    # Try logo
     _logo_reader = None
     if logo_url:
         try:
-            if str(logo_url).startswith(("http://", "https://")):
-                r = requests.get(logo_url, timeout=6)
-                r.raise_for_status()
+            if logo_url.startswith("http"):
+                r = requests.get(logo_url, timeout=5)
                 _logo_reader = ImageReader(io.BytesIO(r.content))
             else:
                 p = Path(logo_url)
@@ -235,145 +223,44 @@ def create_session_pdf(session_entries, logo_url=None, category_display=None):
         except Exception:
             _logo_reader = None
 
-    buf = BytesIO()
-    c = canvas.Canvas(buf, pagesize=letter)
-    W, H = letter
-    margin = 18 * mm
-    inner_w = W - 2 * margin
-
-    def draw_logo():
-        if not _logo_reader:
-            return
-        try:
-            img_w, img_h = _logo_reader.getSize()
-            scale = min((40 * mm) / img_w, (16 * mm) / img_h)
-            c.drawImage(_logo_reader, W - (50 * mm), H - (22 * mm),
-                        width=img_w * scale, height=img_h * scale, preserveAspectRatio=True)
-        except Exception:
-            pass
-
-    # Header + Footer
-    def header(date_str=None):
-        c.setFillColor(COL_BG_CREAM)
-        c.rect(0, H - 28 * mm, W, 28 * mm, stroke=0, fill=1)
-        c.setFillColor(COL_DEEP_BLUE)
-        c.setFont("Helvetica-Bold", 18)
-        c.drawString(margin, H - 15 * mm, "Daily Grace Affirmations")
-        if date_str:
-            c.setFont("Helvetica", 10)
-            c.setFillColor(COL_TEXT_MUTED)
-            c.drawString(margin, H - 20 * mm, date_str)
-        draw_logo()
-
-    def footer():
-        c.setFillColor(COL_TEXT_MUTED)
-        c.setFont("Helvetica-Oblique", 9)
-        c.drawRightString(W - margin, margin - 2, "Daily Grace Affirmations • bythandi.com")
-
-    # Render
-    header(datetime.now().strftime("%Y-%m-%d %H:%M"))
-    footer()
-    y = H - 40 * mm
+    # header
+    c.setFont("Helvetica-Bold", 18)
+    c.setFillColor(COL_BROWN)
+    c.drawString(margin, y, "Daily Grace Affirmations")
+    if _logo_reader:
+        c.drawImage(_logo_reader, W - 120, H - 90, width=70, height=70, preserveAspectRatio=True)
+    y -= 40
 
     for i, entry in enumerate(session_entries, 1):
         c.setFont("Helvetica-Bold", 12)
         c.setFillColor(COL_BROWN)
-        c.drawString(margin, y, f"{i}. {entry.get('text','')}")
-        y -= 12
+        c.drawString(margin, y, f"{i}. {entry.get('text', '')}")
+        y -= 16
         c.setFont("Helvetica", 10)
-        c.setFillColor(COL_DEEP_BLUE)
-        meta = f"{entry.get('category')} • {entry.get('alignment')} • {entry.get('date')}"
-        c.drawString(margin, y, meta)
-        y -= 12
+        c.setFillColor(COL_ORANGE)
+        cat = entry.get("category", "")
+        align = entry.get("alignment", "")
+        date = entry.get("date", "")
+        c.drawString(margin, y, f"{cat} • {align} • {date}")
+        y -= 14
         c.setFillColor(COL_BROWN)
-        reflection_lines = entry.get("reflection", "").split("\n") or ["—"]
-        for line in reflection_lines:
+        reflection = entry.get("reflection", "")
+        for line in reflection.splitlines() or ["—"]:
             c.drawString(margin, y, line)
             y -= 12
         y -= 10
+        if y < 100:
+            c.showPage()
+            y = H - margin
+
     c.save()
     buf.seek(0)
     return buf
 
-
 # -----------------------------
-# 📧 Email Delivery via Resend
+# 💾 Save and Get New
 # -----------------------------
-def _get_secret(name: str, default: str = "") -> str:
-    try:
-        return st.secrets.get(name, default)
-    except Exception:
-        import os
-        return os.getenv(name, default)
-
-RESEND_API_KEY = _get_secret("RESEND_API_KEY")
-FROM_EMAIL = _get_secret("FROM_EMAIL", "affirmations@your-verified-domain.com")
-
-def _validate_email(addr: str) -> bool:
-    pat = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
-    return bool(re.match(pat, addr or ""))
-
-def send_affirmation_email_via_resend(to_email: str, pdf_buffer: BytesIO, affirmation_text: str) -> dict:
-    if not RESEND_API_KEY:
-        return {"ok": False, "error": "Missing RESEND_API_KEY"}
-    if not FROM_EMAIL or "@" not in FROM_EMAIL:
-        return {"ok": False, "error": "Missing or invalid FROM_EMAIL"}
-    try:
-        resend.api_key = RESEND_API_KEY
-        pdf_buffer.seek(0)
-        b64_pdf = base64.b64encode(pdf_buffer.read()).decode("utf-8")
-        html = f"""
-        <div style="font-family: Arial, sans-serif; color:#521305; background:#fff1ea; padding:24px">
-          <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;padding:28px">
-            <h1 style="color:#152d69;text-align:center;margin-top:0">🌿 Daily Grace Affirmations</h1>
-            <p>Here is your affirmation PDF for today.</p>
-            <div style="background:#ffe6c0;border-left:4px solid #f7931e;padding:14px 16px;margin:20px 0">
-              <em>"{affirmation_text}"</em>
-            </div>
-            <p style="color:#666">May this guide your day with peace and clarity.</p>
-            <hr style="border:none;border-top:1px solid #eee;margin:28px 0">
-            <p style="text-align:center;font-size:12px;color:#999">
-              🌸 ByThandi — Daily Grace Affirmations<br>
-              <a href="https://bythandi.com" style="color:#f7931e">bythandi.com</a>
-            </p>
-          </div>
-        </div>
-        """.strip()
-        resp = resend.Emails.send({
-            "from": FROM_EMAIL,
-            "to": [to_email],
-            "subject": "🌿 Your Daily Grace Affirmation PDF",
-            "html": html,
-            "attachments": [{
-                "filename": f"affirmation_{datetime.now().strftime('%Y%m%d')}.pdf",
-                "content": b64_pdf,
-            }],
-        })
-        return {"ok": True, "data": resp}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-
-
-# -----------------------------
-# 💾 Save / Email Affirmation
-# -----------------------------
-st.markdown("---")
-st.markdown("### 📧 Receive Your Affirmation")
-
-delivery_method = st.radio(
-    "Choose how you'd like to receive your personalized PDF:",
-    ["📥 Download PDF", "📧 Email me the PDF"],
-    index=0
-)
-
-user_email = None
-if delivery_method == "📧 Email me the PDF":
-    user_email = st.text_input("✉️ Your email address (for this one PDF):", placeholder="your@email.com")
-    st.caption("_We’ll only use your email to send this PDF. No mailing list, no marketing._")
-
-cta_label = "📧 Save & Email My Affirmation" if delivery_method == "📧 Email me the PDF" else "💾 Save & Get New Affirmation"
-
-if st.button(cta_label) and affirmation:
+if st.button("💾 Save & Get New Affirmation") and affirmation:
     log_entry = {
         "text": affirmation["text"],
         "category": affirmation.get("category", ""),
@@ -389,42 +276,16 @@ if st.button(cta_label) and affirmation:
     except Exception:
         pass
 
-    single_pdf = create_session_pdf([log_entry], logo_url=_logo_source(), category_display=CATEGORY_DISPLAY)
-
-    if delivery_method == "📧 Email me the PDF":
-        if not user_email or not _validate_email(user_email):
-            st.error("⚠️ Please enter a valid email address.")
-            st.stop()
-        with st.spinner("📧 Sending your affirmation..."):
-            result = send_affirmation_email_via_resend(user_email, single_pdf, affirmation["text"])
-        if result.get("ok"):
-            st.success(f"✅ Sent to {user_email}. Check your inbox!")
-        else:
-            st.error("❌ Could not send email.")
-            st.info("💡 You can still download the PDF below.")
-    else:
-        st.success("🗂️ Saved to your affirmation log.")
-
     new_affirmation = random.choice(filtered_affirmations)
     while new_affirmation.get("id") == affirmation.get("id") and len(filtered_affirmations) > 1:
         new_affirmation = random.choice(filtered_affirmations)
 
     st.session_state.selected_affirmation = new_affirmation
-    st.session_state.last_affirmation_id = new_affirmation.get("id") if new_affirmation else None
+    st.session_state.last_affirmation_id = new_affirmation.get("id")
     st.rerun()
 
-
 # -----------------------------
-# 🔀 Shuffle Deck
-# -----------------------------
-if st.button("🔀 Shuffle Deck (optional)"):
-    random.shuffle(st.session_state.deck)
-    st.success("Deck reshuffled — new grace flow ready!")
-    st.rerun()
-
-
-# -----------------------------
-# 📄 Download Full Session
+# 📄 Download Session PDF
 # -----------------------------
 if st.session_state.session_entries:
     st.markdown("### 💾 Download your full session")
@@ -438,10 +299,9 @@ if st.session_state.session_entries:
 else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
-
 # -----------------------------
 # 🌸 Footer
 # -----------------------------
 st.markdown(
-    "🌸 ByThandi — Daily Grace Affirmations — v4.0.4 *Grace Wheels IV — Logo Harmony Fix*  \n🔗 [bythandi.com](https://bythandi.com)"
+    "🌸 ByThandi — Daily Grace Affirmations — v3.8.0 *Grace Wheels II — The Paper Bloom*  \n🔗 [bythandi.com](https://bythandi.com)"
 )
