@@ -1,4 +1,5 @@
 # app.py — Daily Grace Affirmations (with Resend transactional email)
+# Reordered so create_session_pdf is defined BEFORE it’s first used.
 
 import streamlit as st
 import random
@@ -12,7 +13,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 # --- Toggleable logo (set to None to disable) ---
-LOGO_URL = "https://github.com/bythandi/divine-systems-dashboard/blob/main/Bythandi%20Logo.png?raw=true"
+LOGO_URL = "https://github.com/bythandi/divine-systems-dashboard/blob/main/ByThandi%20Logo.png?raw=true"
 # LOGO_URL = None  # <- uncomment this line to disable the logo quickly
 
 # --- Page setup ---
@@ -174,164 +175,35 @@ else:
 st.markdown("---")
 
 # --- Choose affirmation (stable between reruns) ---
-if st.session_state.selected_affirmation is None:
+if st.session_state.selected_affirmation is None and filtered_affirmations:
     st.session_state.selected_affirmation = random.choice(filtered_affirmations)
-    st.session_state.last_affirmation_id = st.session_state.selected_affirmation["id"]
+    st.session_state.last_affirmation_id = st.session_state.selected_affirmation.get("id")
 
 affirmation = st.session_state.selected_affirmation
 
 # --- Display affirmation section ---
-st.markdown("<div class='sub-title'>✨ Today's Affirmation</div>", unsafe_allow_html=True)
-st.markdown(f"<div class='affirmation-box'>📖 {affirmation['text']}</div>", unsafe_allow_html=True)
-
-display_category = CATEGORY_DISPLAY.get(affirmation["category"], affirmation["category"])
-st.write(f"🏷️ **Category:** {display_category}")
+if affirmation:
+    st.markdown("<div class='sub-title'>✨ Today's Affirmation</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='affirmation-box'>📖 {affirmation['text']}</div>", unsafe_allow_html=True)
+    display_category = CATEGORY_DISPLAY.get(affirmation["category"], affirmation["category"])
+    st.write(f"🏷️ **Category:** {display_category}")
+else:
+    st.warning("No affirmations available. Please check your affirmation bank.")
 
 # --- Reflection / Alignment section ---
 st.markdown("<div class='align-box'>", unsafe_allow_html=True)
 st.markdown("<h3 class='align-title'>✨ How aligned do you feel today?</h3>", unsafe_allow_html=True)
-
-alignment = st.radio("", ["Aligned 🌿", "Integrating 🌸", "Unaligned 🌧️"], horizontal=False)
+alignment = st.radio(
+    "Alignment",
+    ["Aligned 🌿", "Integrating 🌸", "Unaligned 🌧️"],
+    horizontal=False,
+    label_visibility="collapsed"
+)
 reflection = st.text_area("🪶 Reflection (optional):", placeholder="Write your thoughts here...")
-
 st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
-# Resend (transactional email)
-# -----------------------------
-def _get_secret(name: str, default: str = "") -> str:
-    """Prefer Streamlit secrets; fall back to env vars."""
-    try:
-        return st.secrets.get(name, default)
-    except Exception:
-        import os
-        return os.getenv(name, default)
-
-RESEND_API_KEY = _get_secret("RESEND_API_KEY")
-FROM_EMAIL = _get_secret("FROM_EMAIL", "affirmations@your-verified-domain.com")
-
-def _validate_email(addr: str) -> bool:
-    pat = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
-    return bool(re.match(pat, addr or ""))
-
-def send_affirmation_email_via_resend(to_email: str, pdf_buffer: BytesIO, affirmation_text: str) -> dict:
-    """Transactional-only email via Resend with base64 PDF attachment."""
-    if not RESEND_API_KEY:
-        return {"ok": False, "error": "Missing RESEND_API_KEY"}
-    if not FROM_EMAIL or "@" not in FROM_EMAIL:
-        return {"ok": False, "error": "Missing or invalid FROM_EMAIL"}
-
-    try:
-        resend.api_key = RESEND_API_KEY
-        pdf_buffer.seek(0)
-        b64_pdf = base64.b64encode(pdf_buffer.read()).decode("utf-8")
-
-        html = f"""
-        <div style="font-family: Arial, sans-serif; color:#521305; background:#fff1ea; padding:24px">
-          <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;padding:28px">
-            <h1 style="color:#152d69;text-align:center;margin-top:0">🌿 Daily Grace Affirmations</h1>
-            <p style="font-size:16px;line-height:1.6">Here is your affirmation PDF for today.</p>
-            <div style="background:#ffe6c0;border-left:4px solid #f7931e;padding:14px 16px;margin:20px 0">
-              <em>"{affirmation_text}"</em>
-            </div>
-            <p style="font-size:14px;color:#666">May this guide your day with peace and clarity.</p>
-            <hr style="border:none;border-top:1px solid #eee;margin:28px 0">
-            <p style="text-align:center;font-size:12px;color:#999">
-              🌸 ByThandi — Daily Grace Affirmations<br>
-              <a href="https://bythandi.com" style="color:#f7931e">bythandi.com</a>
-            </p>
-          </div>
-        </div>
-        """.strip()
-
-        resp = resend.Emails.send({
-            "from": FROM_EMAIL,                  # must be verified in Resend
-            "to": [to_email],
-            "subject": "🌿 Your Daily Grace Affirmation PDF",
-            "html": html,
-            "attachments": [{
-                "filename": f"affirmation_{datetime.now().strftime('%Y%m%d')}.pdf",
-                "content": b64_pdf,
-            }],
-        })
-        return {"ok": True, "data": resp}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-
-# --- Email/Download choice ---
-st.markdown("---")
-st.markdown("### 📧 Receive Your Affirmation")
-
-delivery_method = st.radio(
-    "Choose how you'd like to receive your personalized PDF:",
-    ["📥 Download PDF", "📧 Email me the PDF"],
-    index=0
-)
-
-user_email = None
-if delivery_method == "📧 Email me the PDF":
-    user_email = st.text_input("✉️ Your email address (for this one PDF):", placeholder="your@email.com")
-    st.caption("_We’ll only use your email to send this PDF. No mailing list, no marketing._")
-
-# --- Save and (optionally) email, then refresh ---
-cta_label = "📧 Save & Email My Affirmation" if delivery_method == "📧 Email me the PDF" else "💾 Save & Get New Affirmation"
-
-if st.button(cta_label):
-    log_entry = {
-        "text": affirmation["text"],
-        "category": affirmation.get("category", ""),
-        "alignment": alignment,
-        "reflection": reflection,
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-
-    st.session_state.session_entries.append(log_entry)
-
-    # Ephemeral append (may not persist across deployments)
-    try:
-        with open("affirmation_log.json", "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-
-    # Generate a one-item PDF for this affirmation
-    single_pdf = create_session_pdf([log_entry], logo_url=LOGO_URL)
-
-    if delivery_method == "📧 Email me the PDF":
-        if not user_email or not _validate_email(user_email):
-            st.error("⚠️ Please enter a valid email address.")
-            st.stop()
-
-        with st.spinner("📧 Sending your affirmation..."):
-            result = send_affirmation_email_via_resend(
-                to_email=user_email,
-                pdf_buffer=single_pdf,
-                affirmation_text=affirmation["text"]
-            )
-        if result.get("ok"):
-            st.success(f"✅ Sent to {user_email}. Check your inbox!")
-        else:
-            st.error("❌ We couldn’t send the email.")
-            st.info("💡 You can still download the PDF below.")
-    else:
-        st.success("🗂️ Saved to your affirmation log.")
-
-    # Pick a new affirmation (avoid immediate repeat)
-    new_affirmation = random.choice(filtered_affirmations)
-    while new_affirmation["id"] == affirmation["id"] and len(filtered_affirmations) > 1:
-        new_affirmation = random.choice(filtered_affirmations)
-
-    st.session_state.selected_affirmation = new_affirmation
-    st.session_state.last_affirmation_id = new_affirmation["id"]
-    st.rerun()
-
-# --- Manual Shuffle Deck (optional) ---
-if st.button("🔀 Shuffle Deck (optional)"):
-    random.shuffle(st.session_state.deck)
-    st.success("Deck reshuffled — new grace flow ready!")
-    st.rerun()
-
 # --- PDF generation helper (brand-styled, optional logo) ---
+# (Moved up so it's defined before first use)
 def create_session_pdf(session_entries, logo_url=LOGO_URL):
     from io import BytesIO
     from reportlab.pdfgen import canvas
@@ -528,6 +400,141 @@ def create_session_pdf(session_entries, logo_url=LOGO_URL):
     c.save()
     buf.seek(0)
     return buf
+
+# -----------------------------
+# Resend (transactional email)
+# -----------------------------
+def _get_secret(name: str, default: str = "") -> str:
+    """Prefer Streamlit secrets; fall back to env vars."""
+    try:
+        return st.secrets.get(name, default)
+    except Exception:
+        import os
+        return os.getenv(name, default)
+
+RESEND_API_KEY = _get_secret("RESEND_API_KEY")
+FROM_EMAIL = _get_secret("FROM_EMAIL", "affirmations@your-verified-domain.com")
+
+def _validate_email(addr: str) -> bool:
+    pat = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+    return bool(re.match(pat, addr or ""))
+
+def send_affirmation_email_via_resend(to_email: str, pdf_buffer: BytesIO, affirmation_text: str) -> dict:
+    """Transactional-only email via Resend with base64 PDF attachment."""
+    if not RESEND_API_KEY:
+        return {"ok": False, "error": "Missing RESEND_API_KEY"}
+    if not FROM_EMAIL or "@" not in FROM_EMAIL:
+        return {"ok": False, "error": "Missing or invalid FROM_EMAIL"}
+
+    try:
+        resend.api_key = RESEND_API_KEY
+        pdf_buffer.seek(0)
+        b64_pdf = base64.b64encode(pdf_buffer.read()).decode("utf-8")
+
+        html = f"""
+        <div style="font-family: Arial, sans-serif; color:#521305; background:#fff1ea; padding:24px">
+          <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;padding:28px">
+            <h1 style="color:#152d69;text-align:center;margin-top:0">🌿 Daily Grace Affirmations</h1>
+            <p style="font-size:16px;line-height:1.6">Here is your affirmation PDF for today.</p>
+            <div style="background:#ffe6c0;border-left:4px solid #f7931e;padding:14px 16px;margin:20px 0">
+              <em>"{affirmation_text}"</em>
+            </div>
+            <p style="font-size:14px;color:#666">May this guide your day with peace and clarity.</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:28px 0">
+            <p style="text-align:center;font-size:12px;color:#999">
+              🌸 ByThandi — Daily Grace Affirmations<br>
+              <a href="https://bythandi.com" style="color:#f7931e">bythandi.com</a>
+            </p>
+          </div>
+        </div>
+        """.strip()
+
+        resp = resend.Emails.send({
+            "from": FROM_EMAIL,                  # must be verified in Resend
+            "to": [to_email],
+            "subject": "🌿 Your Daily Grace Affirmation PDF",
+            "html": html,
+            "attachments": [{
+                "filename": f"affirmation_{datetime.now().strftime('%Y%m%d')}.pdf",
+                "content": b64_pdf,
+            }],
+        })
+        return {"ok": True, "data": resp}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+# --- Email/Download choice ---
+st.markdown("---")
+st.markdown("### 📧 Receive Your Affirmation")
+
+delivery_method = st.radio(
+    "Choose how you'd like to receive your personalized PDF:",
+    ["📥 Download PDF", "📧 Email me the PDF"],
+    index=0
+)
+
+user_email = None
+if delivery_method == "📧 Email me the PDF":
+    user_email = st.text_input("✉️ Your email address (for this one PDF):", placeholder="your@email.com")
+    st.caption("_We’ll only use your email to send this PDF. No mailing list, no marketing._")
+
+# --- Save and (optionally) email, then refresh ---
+cta_label = "📧 Save & Email My Affirmation" if delivery_method == "📧 Email me the PDF" else "💾 Save & Get New Affirmation"
+
+if st.button(cta_label) and affirmation:
+    log_entry = {
+        "text": affirmation["text"],
+        "category": affirmation.get("category", ""),
+        "alignment": alignment,
+        "reflection": reflection,
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    st.session_state.session_entries.append(log_entry)
+
+    # Ephemeral append (may not persist across deployments)
+    try:
+        with open("affirmation_log.json", "a", encoding="utf-8") as f:
+            f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+    # Generate a one-item PDF for this affirmation
+    single_pdf = create_session_pdf([log_entry], logo_url=LOGO_URL)
+
+    if delivery_method == "📧 Email me the PDF":
+        if not user_email or not _validate_email(user_email):
+            st.error("⚠️ Please enter a valid email address.")
+            st.stop()
+
+        with st.spinner("📧 Sending your affirmation..."):
+            result = send_affirmation_email_via_resend(
+                to_email=user_email,
+                pdf_buffer=single_pdf,
+                affirmation_text=affirmation["text"]
+            )
+        if result.get("ok"):
+            st.success(f"✅ Sent to {user_email}. Check your inbox!")
+        else:
+            st.error("❌ We couldn’t send the email.")
+            st.info("💡 You can still download the PDF below.")
+    else:
+        st.success("🗂️ Saved to your affirmation log.")
+
+    # Pick a new affirmation (avoid immediate repeat)
+    new_affirmation = random.choice(filtered_affirmations)
+    while new_affirmation.get("id") == affirmation.get("id") and len(filtered_affirmations) > 1:
+        new_affirmation = random.choice(filtered_affirmations)
+
+    st.session_state.selected_affirmation = new_affirmation
+    st.session_state.last_affirmation_id = new_affirmation.get("id") if new_affirmation else None
+    st.rerun()
+
+# --- Manual Shuffle Deck (optional) ---
+if st.button("🔀 Shuffle Deck (optional)"):
+    random.shuffle(st.session_state.deck)
+    st.success("Deck reshuffled — new grace flow ready!")
+    st.rerun()
 
 # --- PDF download section ---
 if st.session_state.session_entries:
