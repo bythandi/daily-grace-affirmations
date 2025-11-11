@@ -18,21 +18,18 @@ Built in Thandi’s Python Corner, this app marks a union of design, devotion, a
 
 💾 PDF journaling system — instantly generate beautifully branded PDFs
 
-💌 Resend-powered email delivery — receive your affirmation in your inbox with grace
+💌 Resend-powered email delivery — receive your affirmation in your inbox with grace (temporarily rolled back for stability)
 
 🎨 ByThandi visual styling — warm palette, calm fonts, intuitive flow
 
 ☁️ Hosted on Streamlit Community Cloud — accessible anywhere
 
-🧩 Tech Stack
+🧩 Tech Stack Layer
 Layer	Tool
 Framework	Streamlit
-
 Language	Python 3.11
-Email API	Resend
-
+Email API	Resend (disabled in stable build)
 PDF Engine	ReportLab
-
 Hosting	Streamlit Community Cloud
 Version Control	Git + GitHub
 🌼 The Journey — From Syntax to Spirit
@@ -48,14 +45,12 @@ Learned patience through JSON quirks and Streamlit reruns; infused each fix with
 
 Days 6–8 — The Breakthrough
 
-Transitioned to Streamlit Cloud, expanded the affirmation bank, and introduced brand styling.
-Version 1.0 was born.
+Transitioned to Streamlit Cloud, expanded the affirmation bank, and introduced brand styling. Version 1.0 was born.
 
 Day 11 — Email Bloom
 
 “Every act of courage builds my confidence.”
-Successfully sent the first live affirmation email with attached PDF via Resend.
-Daily Grace entered its fully blossomed state — faith delivered in code form.
+Successfully sent the first live affirmation email with attached PDF via Resend. Daily Grace entered its fully blossomed state — faith delivered in code form.
 
 🌸 Version History
 Version	Highlights	Date
@@ -63,7 +58,8 @@ v1.0	First Streamlit release	Oct 2025
 v1.1	Refined categories & UI polish	Oct 2025
 v1.2	Added reflections + PDF export	Nov 2025
 v4.0	✉️ Email delivery live · Resend integration stable	Nov 2025
-📖 Upcoming · The Daily Grace Journal
+v3.8	🌿 Stable rollback — Grace Wheels II “The Paper Bloom”	Nov 2025
+📖 Upcoming — The Daily Grace Journal
 
 A Goodnotes-style digital planner designed to house all your emailed PDFs and reflections — transforming Daily Grace into a living gratitude and growth archive.
 Users will be able to:
@@ -86,9 +82,8 @@ a sacred space where debugging feels like devotion and systems become soft.
 🪶 Credits
 
 Creator: ByThandi
-
 Inspiration: Grace, creativity, and divine curiosity
-Technology: Streamlit · ReportLab · Resend · Python · Faith
+Technology: Streamlit · ReportLab · Python · Faith
 
 ☕ Support & Future Vision
 
@@ -103,7 +98,8 @@ Technology: Streamlit · ReportLab · Resend · Python · Faith
 💫 Integration into bythandi.com
  under Tools of Grace
 
-If you explore, remix, or share this app, please credit ByThandi and carry forward its quiet purpose — to build with peace, not pressure.
+If you explore, remix, or share this app, please credit ByThandi and carry forward its quiet purpose —
+to build with peace, not pressure.
 
 🌺 Tagline
 
