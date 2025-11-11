@@ -1,5 +1,5 @@
-# app.py — Daily Grace Affirmations (with Resend transactional email)
-# v4.0.2 — Robust PDF helper (no global lookups) + minor hardening
+# app.py — Daily Grace Affirmations
+# v4.0.3 — Logo fallback (local asset + stable raw URL) + robust PDF helper
 
 import streamlit as st
 import random
@@ -11,26 +11,40 @@ from datetime import datetime
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from pathlib import Path
 
-# --- Toggleable logo (set to None to disable) ---
-LOGO_URL = "https://github.com/bythandi/divine-systems-dashboard/blob/main/ByThandi%20Logo.png?raw=true"
-# LOGO_URL = None  # <- uncomment this line to disable the logo quickly
+# -----------------------------
+# Logo: prefer local asset, fallback to remote raw URL
+# -----------------------------
+LOGO_PATH = "assets/bythandi_logo.png"  # add this file to your repo
+LOGO_URL = "https://raw.githubusercontent.com/bythandi/divine-systems-dashboard/main/ByThandi%20Logo.png"
+
+def _logo_source() -> str | None:
+    """
+    Prefer local file for reliability (works offline and avoids GitHub rate-limits).
+    Fallback to a stable raw.githubusercontent.com URL.
+    """
+    p = Path(LOGO_PATH)
+    if p.exists():
+        return str(p)
+    return LOGO_URL
 
 # --- Page setup ---
 st.set_page_config(page_title="🌿 Daily Grace Affirmations", layout="centered")
 
 # --- Logo section (centered) ---
-if LOGO_URL:
+logo_src = _logo_source()
+if logo_src:
     st.markdown(
         f"""
         <div style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: -40px;
-            padding-top: 10px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            margin-bottom:-40px;
+            padding-top:10px;
         ">
-            <img src="{LOGO_URL}" width="120">
+            <img src="{logo_src}" width="120">
         </div>
         """,
         unsafe_allow_html=True,
@@ -65,7 +79,7 @@ CATEGORY_DISPLAY = {
     "Weave": "Weave Wholeness"
 }
 
-# --- Filter affirmations to 4 canon categories only ---
+# --- Filter affirmations to canon categories only ---
 affirmations = [a for a in affirmations if a.get("category") in CATEGORY_DISPLAY.keys()]
 
 # --- Initialize deck once per app run ---
@@ -221,14 +235,20 @@ def create_session_pdf(session_entries, logo_url=None, category_display=None):
     COL_CARD_FILL  = HexColor("#ffe6c0")
     COL_TEXT_MUTED = HexColor("#666666")
 
-    # Optional: fetch logo (fail silently)
+    # Optional: fetch logo (supports URL or local file; fail silently)
     _logo_reader = None
     if logo_url:
         try:
-            import requests
-            r = requests.get(logo_url, timeout=6)
-            r.raise_for_status()
-            _logo_reader = ImageReader(io.BytesIO(r.content))
+            if str(logo_url).startswith(("http://", "https://")):
+                import requests
+                r = requests.get(logo_url, timeout=6)
+                r.raise_for_status()
+                _logo_reader = ImageReader(io.BytesIO(r.content))
+            else:
+                p = Path(logo_url)
+                if p.exists():
+                    with open(p, "rb") as f:
+                        _logo_reader = ImageReader(io.BytesIO(f.read()))
         except Exception:
             _logo_reader = None
 
@@ -357,7 +377,7 @@ def create_session_pdf(session_entries, logo_url=None, category_display=None):
             y = new_page(include_dt=True)
 
         c.setFillColor(COL_CARD_FILL)
-        c.setStrokeColor(COL_ORANGE)
+        c.setStrokeColor(CCOL_ORANGE := COL_ORANGE)  # keep name stable even if editor refactors
         c.setLineWidth(1.5)
         c.roundRect(margin, y - card_h, inner_w, card_h, 6, stroke=1, fill=1)
 
@@ -502,7 +522,7 @@ if st.button(cta_label) and affirmation:
     # Generate a one-item PDF for this affirmation
     single_pdf = create_session_pdf(
         [log_entry],
-        logo_url=LOGO_URL,
+        logo_url=_logo_source(),
         category_display=CATEGORY_DISPLAY
     )
 
@@ -545,7 +565,7 @@ if st.session_state.session_entries:
     st.markdown("### 💾 Download your full session")
     pdf_buffer = create_session_pdf(
         st.session_state.session_entries,
-        logo_url=LOGO_URL,
+        logo_url=_logo_source(),
         category_display=CATEGORY_DISPLAY
     )
     st.download_button(
@@ -558,5 +578,5 @@ else:
     st.info("💡 Save at least one affirmation to enable PDF download.")
 
 st.markdown(
-    "🌸 ByThandi — Daily Grace Affirmations — v4.0.2 *Grace Wheels III — Email Bloom Patch II*  \n🔗 [bythandi.com](https://bythandi.com)"
+    "🌸 ByThandi — Daily Grace Affirmations — v4.0.3 *Grace Wheels III — Logo Harmony Patch*  \n🔗 [bythandi.com](https://bythandi.com)"
 )
