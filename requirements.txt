@@ -1,6 +1,5 @@
 streamlit
 reportlab
-requests
-resend
+requests>=2.31.0,<3
 pandas
 numpy
