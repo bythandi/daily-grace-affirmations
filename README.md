@@ -1,125 +1,110 @@
-Perfect 🌸 — here’s the **refreshed and renamed README** for your project, now aligned with the **Daily Grace Affirmations** identity.
-It keeps the poetic rhythm and reflective warmth of the Divine Systems version but presents *Daily Grace* as its own standalone experience — graceful, grounded, and portfolio-ready.
+🌿 Daily Grace Affirmations
 
----
+A ByThandi creation — where calm meets creativity and faith meets flow.
 
-# 🌸 Daily Grace Affirmations
+✨ Overview
 
-*A ByThandi creation — where calm meets creativity and faith meets focus.*
+Daily Grace Affirmations is a Streamlit-powered reflection app designed to bring faith, creativity, and gentle self-discipline into a single moment of grace.
 
----
+Rooted in the ByThandi ecosystem, it began as a Python learning experiment and blossomed into a living system of encouragement — a tool that turns small reflections into sacred rhythms.
 
-## ✨ Overview
+Built in Thandi’s Python Corner, this app marks a union of design, devotion, and digital craftsmanship — a reminder that code, too, can be a form of prayer.
 
-The **Daily Grace Affirmations** app is a Streamlit-powered reflection tool that helps users centre their day in faith, creativity, and gentle discipline.
+🌸 Key Features
 
-Rooted in the ByThandi ecosystem, it began as a learning experiment in Python and evolved into a soulful digital companion — one that blends code, design, and devotion into a simple daily practice.
+🌿 Faith-coded affirmations from the Create · Build · Believe · Weave framework
 
-Built in the **Python Corner** — Thandi’s creative lab for divinely inspired code — this project bridges the sacred and the systematic, inviting users to breathe, reflect, and realign.
+💬 Reflection & alignment tracking — capture your thoughts in real time
 
----
+💾 PDF journaling system — instantly generate beautifully branded PDFs
 
-## 🌿 Features
+💌 Resend-powered email delivery — receive your affirmation in your inbox with grace
 
-* 🌸 Minimal, calming Streamlit interface in ByThandi brand colours
-* 🪶 Curated affirmation bank drawn from the *Create · Build · Believe · Weave* framework
-* 💾 Reflection and journaling options to nurture awareness and growth
-* 🧭 Randomised daily affirmations with optional category selection
-* ☁️ Fully deployed on **Streamlit Community Cloud**
-* 💌 Email-to-PDF feature (coming soon) to gently collect user affirmations
+🎨 ByThandi visual styling — warm palette, calm fonts, intuitive flow
 
----
+☁️ Hosted on Streamlit Community Cloud — accessible anywhere
 
-## 🧩 Tech Stack
+🧩 Tech Stack
+Layer	Tool
+Framework	Streamlit
 
-| Layer           | Tool                               |
-| :-------------- | :--------------------------------- |
-| Framework       | [Streamlit](https://streamlit.io/) |
-| Language        | Python 3                           |
-| Data            | JSON                               |
-| Hosting         | Streamlit Community Cloud          |
-| Version Control | Git + GitHub                       |
+Language	Python 3.11
+Email API	Resend
 
----
+PDF Engine	ReportLab
 
-## 🌼 The Journey — *From Curiosity to Grace*
+Hosting	Streamlit Community Cloud
+Version Control	Git + GitHub
+🌼 The Journey — From Syntax to Spirit
+Day 1 — The Spark
 
-### **Day 1 — The Spark**
+“I wanted to learn Python… so I built an affirmation tool.”
+Started as a curiosity in Colab and quickly became a practice in mindfulness.
 
-> “I wanted to learn Python… so I built an affirmation tool.”
+Days 3–5 — Debugging as Devotion
 
-* Began in Google Colab with a few lines of code and a calling to create.
-* Learned the basics of `random`, `json`, and `datetime`.
-* Discovered that even syntax errors can teach patience and trust.
+“Every function I fixed became a faith function.”
+Learned patience through JSON quirks and Streamlit reruns; infused each fix with presence.
 
----
+Days 6–8 — The Breakthrough
 
-### **Days 3–5 — Debugging as Devotion**
+Transitioned to Streamlit Cloud, expanded the affirmation bank, and introduced brand styling.
+Version 1.0 was born.
 
-* Faced JSON quirks, session resets, and formatting frustrations.
-* Learned that every bug is an opportunity to listen and grow.
-* Styled the interface to reflect the soft hues of ByThandi’s brand palette.
+Day 11 — Email Bloom
 
-> “Every function I fixed became a faith function.”
+“Every act of courage builds my confidence.”
+Successfully sent the first live affirmation email with attached PDF via Resend.
+Daily Grace entered its fully blossomed state — faith delivered in code form.
 
----
+🌸 Version History
+Version	Highlights	Date
+v1.0	First Streamlit release	Oct 2025
+v1.1	Refined categories & UI polish	Oct 2025
+v1.2	Added reflections + PDF export	Nov 2025
+v4.0	✉️ Email delivery live · Resend integration stable	Nov 2025
+📖 Upcoming · The Daily Grace Journal
 
-### **Days 6–8 — The Breakthrough**
+A Goodnotes-style digital planner designed to house all your emailed PDFs and reflections — transforming Daily Grace into a living gratitude and growth archive.
+Users will be able to:
 
-* Transitioned from Colab tunnels to **Streamlit Cloud**.
-* Expanded the affirmation bank to 20+ faith-coded entries.
-* Introduced category filters for *Create · Build · Believe · Weave*.
-* Declared the first stable version: **Daily Grace Affirmations v1.0.**
+Organise their affirmation PDFs neatly in an Affirmation Archive section
 
-> “Pre-AI coding era could never.” 😂
+Deepen journaling through gratitude prompts and monthly reflection pages
 
----
+Blend printable beauty with digital convenience
 
-## 🌸 Version History
+The app plants the seed — the journal nurtures the garden.
 
-| Version  | Highlights                                               | Date     |
-| :------- | :------------------------------------------------------- | :------- |
-| **v1.0** | First Streamlit release under *Daily Grace Affirmations* | Oct 2025 |
-| **v1.1** | Enhanced interface and refined categories                | Oct 2025 |
-| **v1.2** | Added reflection inputs and stable PDF generation        | Nov 2025 |
-| **v1.3** | Upcoming: Email delivery integration                     | —        |
+💖 Reflection
 
----
+Daily Grace Affirmations began as code but became communion —
+a sacred space where debugging feels like devotion and systems become soft.
 
-## 💖 Reflection
+“When we code with calm, technology becomes a form of worship.”
 
-**Daily Grace Affirmations** began as code but became communion —
-a meeting place between structure and spirit, where systems can still feel soft.
+🪶 Credits
 
-It’s proof that when we build with presence, even a Python app can become a prayer.
+Creator: ByThandi
 
-> “Debugging isn’t failure; it’s conversation.”
+Inspiration: Grace, creativity, and divine curiosity
+Technology: Streamlit · ReportLab · Resend · Python · Faith
 
----
+☕ Support & Future Vision
 
-## 🪶 Credits
+🕊 Grace Journal & Planner launch
 
-**Creator:** [ByThandi](https://bythandi.com)
-**Inspiration:** Grace, creativity, and the quiet desire to code with compassion.
-**Technology:** Streamlit · Python · ReportLab · Divine timing
+🌸 Daily email reminders & reflection streaks
 
----
+💾 Optional cloud reflection archive
 
-## ☕ Support & Future Vision
+🎨 Expanded visual theme and layout options
 
-* 💌 Email-to-PDF feature for affirmation delivery
-* ☁️ Optional cloud reflection storage (Google Sheets / Notion)
-* 🎨 Enhanced visual design with cards and icons
-* 🕊️ “Affirmation Archive” for personal history tracking
-* 💫 Integration into [ByThandi.com](https://bythandi.com) — *Tools of Grace* section
+💫 Integration into bythandi.com
+ under Tools of Grace
 
-If you’d like to explore or remix this app, please credit **ByThandi** and preserve its spirit of creativity and peace.
+If you explore, remix, or share this app, please credit ByThandi and carry forward its quiet purpose — to build with peace, not pressure.
 
----
+🌺 Tagline
 
-### 🌺 Tagline
-
-> *Daily Grace — where faith flows through every line of code.*
-
----
-
+Daily Grace — where faith flows through every line of code.
